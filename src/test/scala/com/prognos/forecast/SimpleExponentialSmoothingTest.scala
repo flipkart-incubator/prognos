@@ -1,8 +1,9 @@
 package com.prognos.forecast
 
 import breeze.linalg.DenseVector
-import com.prognos.{DoubleUtil, Series}
+import com.prognos.Series
 import com.prognos.testdata.OilData
+import com.prognos.util.DoubleUtil
 import org.scalatest.{Matchers, FlatSpec}
 
 class SimpleExponentialSmoothingTest extends FlatSpec with Matchers {

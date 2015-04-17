@@ -1,4 +1,4 @@
-package com.prognos
+package com.prognos.util
 
 object DoubleUtil {
   val DefaultScale = 2
