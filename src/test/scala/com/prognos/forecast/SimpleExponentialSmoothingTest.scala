@@ -10,8 +10,7 @@ class SimpleExponentialSmoothingTest extends FlatSpec with Matchers {
     val series = Series(OilData.rangeData(1996, 2007))
     val algo = new SimpleExponentialSmoothing
     val (alpha, sesType, horizon) = (0.2, "simple", 3)
-    val (levels, forecasts) = algo.calculate(series, alpha, sesType, horizon)
-    levels.length should equal(12)
+    val forecasts = algo.calculate(series, alpha, sesType, horizon)
     forecasts.length should equal(3)
     forecasts.map{value => DoubleUtil.round(value)} should equal(DenseVector(484.80, 484.80, 484.80))
   }

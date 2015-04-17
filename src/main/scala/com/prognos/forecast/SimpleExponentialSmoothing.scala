@@ -7,16 +7,12 @@ import breeze.numerics._
 
 class SimpleExponentialSmoothing {
   def calculate(series: Series, alpha: Double, algoType: String, horizon: Int) = {
+    if(!"simple".equals(algoType)) throw new IllegalArgumentException("Invalid SES algoType:" + algoType)
     val data = series.data
-    var prevValue = data(0)
-    var prevLevel = data(0)
-    val levels:DenseVector[Double] = data.map { value =>
-      val level = alpha * value + (1 - alpha) * prevLevel
-      prevValue = value
-      prevLevel = level
-      level
+    val initialLevel = data(0)
+    val forecast = data.foldLeft(initialLevel) {case (level, value) =>
+      alpha * value + (1 - alpha) * level
     }
-    val forecasts = DenseVector(Array.fill(horizon)(prevLevel))
-    (levels, forecasts)
+    DenseVector(Array.fill(horizon)(forecast))
   }
 }
