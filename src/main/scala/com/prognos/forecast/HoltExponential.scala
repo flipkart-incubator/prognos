@@ -7,8 +7,8 @@ class HoltExponential {
    def calculate(series: Series, alpha: Double, beta: Double, algoType: String, horizon: Int) = {
      if(!"simple".equals(algoType)) throw new IllegalArgumentException("Invalid Holt algoType:" + algoType)
      val data = series.data
-     val initialLevel = data(0)
-     val initialTrend = data(1) / data(0)
+     val initialLevel = calcInitialLevel(data)
+     val initialTrend = calcInitialTrend(data)
      val (level, trend) = data.toArray.foldLeft((initialLevel, initialTrend)) {case (levelAndTrend:(Double,Double), value:Double) =>
        val (prevLevel, prevTrend) = levelAndTrend
        println((prevLevel, prevTrend))
@@ -20,7 +20,15 @@ class HoltExponential {
      DenseVector(forecasts)
    }
 
-   private def calcForecast(level: Double, trend: Double, horizon: Int): Double = {
+  private def calcInitialLevel(data: DenseVector[Double]): Double = {
+    data(0)
+  }
+
+  private def calcInitialTrend(data: DenseVector[Double]): Double = {
+    data(1) / data(0)
+  }
+
+  private def calcForecast(level: Double, trend: Double, horizon: Int): Double = {
      level * Math.pow(trend, horizon)
    }
 

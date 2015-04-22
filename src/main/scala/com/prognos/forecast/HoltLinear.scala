@@ -9,8 +9,8 @@ class HoltLinear {
   def calculate(series: Series, alpha: Double, beta: Double, algoType: String, horizon: Int) = {
     if(!"simple".equals(algoType)) throw new IllegalArgumentException("Invalid Holt algoType:" + algoType)
     val data = series.data
-    val initialLevel = data(0)
-    val initialTrend = data(1) - data(0)
+    val initialLevel = calcInitialLevel(data)
+    val initialTrend = calcInitialTrend(data)
     val (level, trend) = data.toArray.foldLeft((initialLevel, initialTrend)) {case (levelAndTrend:(Double,Double), value:Double) =>
       val (prevLevel, prevTrend) = levelAndTrend
       val level:Double = calcLevel(alpha, value, prevLevel, prevTrend)
@@ -19,6 +19,14 @@ class HoltLinear {
     }
     val forecasts = (1 to horizon).map {h => calcForecast(level, trend, h)}.toArray
     DenseVector(forecasts)
+  }
+
+  private def calcInitialLevel(data: DenseVector[Double]): Double = {
+    data(0)
+  }
+
+  private def calcInitialTrend(data: DenseVector[Double]): Double = {
+    data(1) - data(0)
   }
 
   private def calcForecast(level: Double, trend: Double, horizon: Int): Double = {
