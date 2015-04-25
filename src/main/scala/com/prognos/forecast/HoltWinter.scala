@@ -6,7 +6,7 @@ import breeze.stats.mean
 
 class HoltWinter {
   def calculate(series: Series, alpha: Double, beta: Double, gamma: Double, period:Int, algoType: String, horizon: Int) = {
-    if(!"simple".equals(algoType)) throw new IllegalArgumentException("Invalid Holt algoType:" + algoType)
+    if(!"simple".equals(algoType)) throw new IllegalArgumentException("Invalid HoltWinter algoType:" + algoType)
     val data = series.data
     val initialLevel:Double = calcInitialLevel(data, period)
     val initialTrend:Double = calcInitialTrend(data, period, initialLevel)

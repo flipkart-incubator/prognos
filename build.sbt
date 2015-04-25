@@ -1,6 +1,8 @@
 name := "prognos"
  
 version := "1.0"
+
+organization := "com.fk"
  
 scalaVersion := "2.10.5"
 
