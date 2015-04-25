@@ -4,7 +4,7 @@ Prognos is a forecasting libray in Scala similar to [R forecast package](http://
 It's implemented using [breeze](https://github.com/scalanlp/breeze) numerical computing library.
 
 Algorithms in this library can be used from Scalding, Spark and other Java/Scala applications.
-Check tests, [prognos-scalding-example](https://bitbucket.org/sathish316/prognos-scalding-example) and [prognos-spark-example](https://bitbucket.org/sathish316/prognos-spark-example) for usage examples.
+Check tests, [prognos-scalding-example](https://github.com/sathish316/prognos-scalding-example) and [prognos-spark-example](https://github.com/sathish316/prognos-spark-example) for usage examples.
 
 Forecasting algorithms in this library are based on the book [Forecasting Principles and Practice](https://www.otexts.org/fpp) by Rob Hyndman
 

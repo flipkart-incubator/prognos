@@ -11,7 +11,6 @@ class HoltExponential {
      val initialTrend = calcInitialTrend(data)
      val (level, trend) = data.toArray.foldLeft((initialLevel, initialTrend)) {case (levelAndTrend:(Double,Double), value:Double) =>
        val (prevLevel, prevTrend) = levelAndTrend
-       println((prevLevel, prevTrend))
        val level:Double = calcLevel(alpha, value, prevLevel, prevTrend)
        val trend:Double = calcTrend(beta, prevLevel, prevTrend, level)
        (level, trend)
