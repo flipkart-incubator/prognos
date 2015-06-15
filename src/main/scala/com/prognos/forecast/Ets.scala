@@ -69,8 +69,12 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
       initialLevel
     }
     else{
-      // TODO implement initialLevel Calculation
-      1.0
+      if (modelType=="ANN" || modelType=="MNN" || modelType=="AAN" || modelType=="MAN"){
+        data(0)
+      }
+      else{
+        1.0
+      }
     }
   }
 
@@ -78,8 +82,11 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
     if (initialValuesPassed){
       initialTrend
     }
-    else{
+    else if (modelType=="AAN" || modelType=="MAN"){
       // TODO implement initialTrend Calculation
+      data(1)/data(0)
+    }
+    else{
       1.0
     }
   }
@@ -120,9 +127,12 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
   * This function calculates the error in the forecasting
   * */
   private def calcError(value:Double, modelType:String, prevLevel:Double, prevTrend:Double, prevSeasonal:DenseVector[Double], period:Int):Double = {
-    val halfExp = operByChar(modelType.charAt(1), prevLevel, prevTrend)
-    val predicted = operByChar(modelType.charAt(2), halfExp, prevSeasonal(-period))
-    if (modelType.charAt(0)=='A'){  // additive error, return the difference
+    val errorType = modelType.charAt(0)
+    val trendType = modelType.charAt(1)
+    val seasonType = modelType.charAt(2)
+    val levelTrendCombiner = operByChar(trendType, prevLevel, prevTrend)
+    val predicted = operByChar(seasonType, levelTrendCombiner, prevSeasonal(-period))
+    if (errorType=='A'){  // additive error, return the difference
       value - predicted
     }
     else{
@@ -140,25 +150,29 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
                         prevSeasonal:DenseVector[Double], error: Double, period:Int):Double = {
 
     //    prevLevel*(1 + alpha*error)
-    val halfExp = operByChar(modelType.charAt(1), prevLevel, prevTrend) // half of the expresssion
-    if (modelType.charAt(0)=='A'){
+    // errorType, trendType, seasonalityType, levelTrendCombiner, levelCalculator
+    val errorType = modelType.charAt(0)
+    val trendType = modelType.charAt(1)
+    val seasonType = modelType.charAt(2)
+    val levelTrendCombiner = operByChar(trendType, prevLevel, prevTrend) // half of the expresssion
+    if (errorType=='A'){
       // additive type error
-      val addedExp = {
-        modelType.charAt(2) match {
+      val seasonalPart = {
+        seasonType match {
           case 'M' => (alpha*error)/prevSeasonal(-period)
           case _ => alpha*error
         }
       }
-      halfExp + addedExp
+      levelTrendCombiner + seasonalPart
     }
     else{ // multiplicative type
-    val addedExp = {
-      modelType.charAt(2) match {
+    val seasonalPart = {
+      seasonType match {
         case 'A' => alpha*error*prevSeasonal(-period)
         case _ => 0
       }
     }
-      halfExp*(1+(alpha*error)) + addedExp
+      levelTrendCombiner*(1+(alpha*error)) + seasonalPart
     }
   }
 
@@ -169,19 +183,21 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
   * */
   private def calcTrend(alpha:Double, beta:Double, gamma:Double, modelType:String, prevLevel:Double, prevTrend:Double,
                         prevSeasonal:DenseVector[Double], error:Double, period:Int) = {
-
-    if (modelType.charAt(1)=='N'){
+    val errorType = modelType.charAt(0)
+    val trendType = modelType.charAt(1)
+    val seasonType = modelType.charAt(2)
+    if (trendType=='N'){
       // need this to make sure there are no divideByZeros in case of this function being called with
       // other data
       1.0
     }
     else{
-      if (modelType.charAt(0)=='A') {
-        val mTrendFactor = modelType.charAt(1) match {
+      if (errorType=='A') {
+        val mTrendFactor = trendType match {
           case 'M' => prevLevel
           case _ => 1
         }
-        val mSeasonalFactor = modelType.charAt(2) match {
+        val mSeasonalFactor = seasonType match {
           case 'M' => prevSeasonal(-period)
           case _ => 1
         }
@@ -189,21 +205,23 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
         // refer to the website declared above for more details
         prevTrend + beta * error / (mTrendFactor * mSeasonalFactor)
       }
-      else if (modelType.charAt(0)=='M'){
-        val levelTrend = operByChar(modelType.charAt(1), prevLevel, prevTrend)*(1 + beta*error)
-        val sub = modelType.charAt(2) match {
+      else if (errorType=='M'){
+        val levelTrend = operByChar(trendType, prevLevel, prevTrend)*(1 + beta*error)
+        val seasonalPart = seasonType match {
           case 'A' => beta*error*prevSeasonal(-period)
           case _ => 0
         }
-        val diffFactor = modelType.charAt(1) match {
+        // difference factor - amount to be subtracted
+        val diffFactor = trendType match {
           case 'A' => prevLevel
           case _ => 0
         }
-        val divFactor = modelType.charAt(1) match {
+        // division factor - amount to be divided
+        val divFactor = trendType match {
           case 'M' => prevLevel
           case _ => 1
         }
-        val levelTrendWithSeason = levelTrend - sub
+        val levelTrendWithSeason = levelTrend - seasonalPart
         (levelTrendWithSeason - diffFactor)/divFactor
       }
       else{
@@ -219,22 +237,25 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
   private def calcSeasonal(alpha:Double, beta:Double, gamma:Double, modelType:String, prevLevel:Double, prevTrend:Double,
                            prevSeasonal:DenseVector[Double], error:Double, period:Int) = {
     // to ensure no divideByZeros
-    if (modelType.charAt(2)=='N'){1.0}
-    else if (modelType.charAt(0)=='A'){
-      val common = prevSeasonal(-period)
-      val divFactor = modelType.charAt(2) match  {
+    val errorType = modelType.charAt(0)
+    val trendType = modelType.charAt(1)
+    val seasonType = modelType.charAt(2)
+    if (seasonType=='N'){1.0}
+    else if (errorType=='A'){
+      val seasonalPart = prevSeasonal(-period)
+      val levelTrendCombiner = seasonType match  {
         case 'A' => 1
-        case 'M' => operByChar(modelType.charAt(1), prevLevel, prevTrend)
+        case 'M' => operByChar(trendType, prevLevel, prevTrend)
       }
-      common + (gamma*error)/divFactor
+      seasonalPart + (gamma*error)/levelTrendCombiner
     }
     else {
-      val common = prevSeasonal(-period) * (1 + gamma * error)
-      val addedExp = modelType.charAt(2) match {
-        case 'A' => operByChar(modelType.charAt(1), prevLevel, prevTrend)
+      val seasonalPart = prevSeasonal(-period) * (1 + gamma * error)
+      val levelTrendCombiner = seasonType match {
+        case 'A' => operByChar(trendType, prevLevel, prevTrend)
         case 'M' => 0
       }
-      common + (gamma * error * addedExp)
+      seasonalPart + (gamma * error * levelTrendCombiner)
     }
   }
 
@@ -242,12 +263,7 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
   private def valid(x:String):Boolean = {
     if (x.length !=3) return false
     val invalidModels = Set("amn", "anm", "aam", "ama", "mma", "amm")
-    if (invalidModels.contains(x.toLowerCase())){
-      false
-    }
-    else{
-      x.forall(goodType)
-    }
+    (!invalidModels.contains(x.toLowerCase()) && x.forall(goodType) && x.charAt(0)!='N')
   }
 
   // return true if the character is among the valid types
@@ -266,8 +282,11 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
   // forecasting
   private def calcForecast(level:Double, trend:Double, seasonalIndices:DenseVector[Double], h:Int, period:Int, modelType:String):Double= {
     // refer to https://www.otexts.org/sites/default/files/fpp/images/Table7-8.png for more details
-    val levelAndTrend = powerByChar(modelType.charAt(1), level, trend, h) // expression containing only level and trend
+    val errorType = modelType.charAt(0)
+    val trendType = modelType.charAt(1)
+    val seasonType = modelType.charAt(2)
+    val levelAndTrend = powerByChar(trendType, level, trend, h) // expression containing only level and trend
     val hPlus = (h - 1)%period
-    operByChar(modelType.charAt(2), levelAndTrend, seasonalIndices( hPlus -period ))
+    operByChar(seasonType, levelAndTrend, seasonalIndices( hPlus -period ))
   }
 }
