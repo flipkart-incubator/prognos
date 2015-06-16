@@ -10,8 +10,6 @@ import com.prognos.util.DoubleUtil
 import org.scalatest.{FlatSpec,Matchers}
 import com.prognos.testdata.TouristsData
 
-// incomplete
-
 class EtsTest_xAM extends FlatSpec with Matchers{
   // aam is forbidden
   it should "testing MAM" in {

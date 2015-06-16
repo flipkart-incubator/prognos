@@ -4,8 +4,6 @@ package com.ets.forecast
  * Created by nikhil.vavs on 11/06/15.
  */
 
-// incomplete
-
 import com.prognos.Series
 import breeze.linalg.DenseVector
 import com.prognos.util.DoubleUtil
