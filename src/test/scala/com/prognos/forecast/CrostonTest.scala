@@ -8,17 +8,21 @@ import org.scalatest.{FlatSpec, Matchers}
  */
 class CrostonTest extends FlatSpec with Matchers{
 
-    val obj=new Croston()
-    val data = CrostonTestData.data
-    val result = CrostonTestData.target
+    val algo = new Croston()
 
     it must "forecast using croston algorithm" in {
-      val dataFloat = Array.fill(data.length) {
-        1.000
+      CrostonTestData.inputSeriesList.zip(CrostonTestData.targetList).foreach { case (data:Array[Int], expected:Double) =>
+        val series = data.map(_.toDouble)
+        val prediction = algo.predict(series, 1)
+        expected match {
+          case 0 => assert(prediction - expected <= 0.5)
+          case expected => {
+            val error = (prediction - expected) / expected
+            println(expected)
+            println(error)
+            assert(error <= 0.05)
+          }
+        }
       }
-
-      for (i <- 0 to data.length - 1) dataFloat(i) = data(i).toFloat
-
-      assert(math.abs(obj.predict(dataFloat,1)-result)<=0.05 *result)
     }
   }
