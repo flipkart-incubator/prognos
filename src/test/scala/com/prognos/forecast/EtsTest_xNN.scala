@@ -13,7 +13,8 @@ import com.prognos.testdata.OilData
 class EtsTest_xNN extends FlatSpec with Matchers {
   it should "testing ANN, MNN" in {
     val series = Series(OilData.rangeData(1965, 2010))
-    val algo = new Ets(111.1126, 0, DenseVector(0))
+    val algo = new Ets()
+    algo.setInitialValues(111.1126, 0, DenseVector(0))
     val (alpha, beta, gamma, period, horizon) = (0.9999, 0, 0, 1, 3)
     val forecastsANN = algo.calculateETS(series, alpha, beta, gamma, "ANN", period, horizon)
     val forecastsMNN = algo.calculateETS(series, alpha, beta, gamma, "MNN", period, horizon)

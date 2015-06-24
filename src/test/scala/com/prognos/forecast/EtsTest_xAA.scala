@@ -35,7 +35,8 @@ class EtsTest_xAA extends FlatSpec with Matchers{
     //    b = 0.4086
     //    s=2.1252, -1.2615, -6.08, 5.2162
 
-    val algo = new Ets(24.9416, 0.5088, DenseVector(0.9781, -0.7702, -6.9848, 6.7769))
+    val algo = new Ets()
+    algo.setInitialValues(24.9416, 0.5088, DenseVector(0.9781, -0.7702, -6.9848, 6.7769))
     val (alpha, beta, gamma, period, horizon) = (0.2889, 0.0001, 0.4452, 4, 4)
     val forecasts = algo.calculateETS(series, alpha, beta, gamma, "AAA", period , horizon)
     forecasts.length should equal(4)

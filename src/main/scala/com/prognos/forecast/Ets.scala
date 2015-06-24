@@ -12,15 +12,19 @@ import math.pow
 * Usage : val a = new Ets(1.0, 3.6, DenseVector(1.3, 3,2, 2))
 *       or val a = new Ets()
 * */
-class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[Double], initialValuesPassed:Boolean) {
+class Ets{
   // amn, anm, aam, ama, mma, amm models are not allowed
 
-  def this(){
-    this(0, 0, DenseVector(0), false)
-  }
+  var initialLevel = -1.0
+  var initialTrend = 1.0
+  var initialSeasonal = DenseVector(0.0)
+  var initialValuesPassed = false
 
-  def this(x:Double, y:Double, z:DenseVector[Double]){
-    this(x, y, z, true)
+  def setInitialValues(x:Double, y:Double, z:DenseVector[Double]) = {
+    initialLevel = x
+    initialTrend = y
+    initialSeasonal = z
+    initialValuesPassed = true
   }
 
   /*

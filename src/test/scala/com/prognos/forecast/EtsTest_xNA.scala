@@ -13,7 +13,8 @@ import com.prognos.testdata.TouristsData
 class EtsTest_xNA extends FlatSpec with Matchers {
   it should "testing ANA, MNA" in {
     val series = Series(TouristsData.seasonalRangeData(1999, 2010))
-    val algo = new Ets(25.233, 0, DenseVector(1.9832, -0.5609, -6.2767, 4.8545))
+    val algo = new Ets()
+    algo.setInitialValues(25.233, 0, DenseVector(1.9832, -0.5609, -6.2767, 4.8545))
     val (alpha, beta, gamma, period, horizon) = (0.511, 0, 0.4153, 4, 4)
     //    Smoothing parameters:
     //      alpha = 0.511
