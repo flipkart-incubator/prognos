@@ -25,8 +25,8 @@ class EtsTest_xAN extends FlatSpec with Matchers{
     //      l = 6.2557
     //      b = 1.0875
 
-    val forecasts_MAN = algo.calculateETS(series, alpha, beta, gamma, "MAN",period, horizon)
-    val forecasts_AAN = algo.calculateETS(series, alpha, beta, gamma, "AAN",period, horizon)
+    val (forecasts_MAN, _) = algo.calculateETS(series, alpha, beta, gamma, "MAN",period, horizon)
+    val (forecasts_AAN, _) = algo.calculateETS(series, alpha, beta, gamma, "AAN",period, horizon)
     forecasts_MAN.length should equal(5)
     forecasts_MAN.map(DoubleUtil.round(_, 1)) should equal(DenseVector(51.1, 52.1, 53.1, 54.2, 55.2))
     forecasts_AAN.length should equal(5)

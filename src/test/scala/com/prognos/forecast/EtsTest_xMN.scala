@@ -25,7 +25,7 @@ class EtsTest_xMN extends FlatSpec with Matchers{
     //    b = 1.0433
 
     // amn is not allowed, just use mmn
-    val forecasts_MMN = algo.calculateETS(series, alpha, beta, gamma, "MMN",period, horizon)
+    val (forecasts_MMN, _) = algo.calculateETS(series, alpha, beta, gamma, "MMN",period, horizon)
     forecasts_MMN.length should equal(5)
     forecasts_MMN.map(DoubleUtil.round(_, 1)) should equal(DenseVector(52.5, 54.8, 57.2, 59.7, 62.3))
   }

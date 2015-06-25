@@ -38,22 +38,29 @@ class Ets {
     val initialTrend = calcInitialTrend(data, modelType, initialLevel)
     val initialSeasonalIndices:DenseVector[Double] = calcInitialSeasonal(data, modelType, initialLevel, initialTrend)
 
-    val (level, trend, seasonalIndices) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonalIndices)) {
-      case (levelTrendSeasonAndError:(Double, Double, DenseVector[Double]), value:Double) =>
-        val (prevLevel, prevTrend, prevSeasonal) = levelTrendSeasonAndError
+    val (level, trend, seasonalIndices, sse) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonalIndices, 0.0)) {
+      case (levelTrendSeasonAndError:(Double, Double, DenseVector[Double], Double), value:Double) =>
+        val (prevLevel, prevTrend, prevSeasonal, currSSE) = levelTrendSeasonAndError
         //        printSeasonal(prevSeasonal)
         val currError = calcError(value, modelType, prevLevel, prevTrend, prevSeasonal, period)
+        val nextSSE = currSSE + currError*currError
         val level:Double = calcLevel(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
         val trend:Double = calcTrend(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
         val seasonalIndex:Double = calcSeasonal(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
-        (level, trend, concat(prevSeasonal, seasonalIndex))
+        (level, trend, concat(prevSeasonal, seasonalIndex), nextSSE)
     }
     //    println("level:"+level)
     //    println("trend:"+trend)
     //    printSeasonal(seasonalIndices)
 
+    val n = data.length
+    val k = 3 - modelType.count( c => c=='N') // number of parameters estimated
+
+
+    val aic = n*math.log(sse/n) + 2*k
+
     val forecasts = (1 to horizon).map(h => calcForecast(level, trend, seasonalIndices, h, period, modelType)).toArray
-    DenseVector(forecasts)
+    (DenseVector(forecasts), aic)
   }
 
   //debug functions

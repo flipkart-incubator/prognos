@@ -26,7 +26,7 @@ class EtsTest_xNM extends FlatSpec with Matchers {
     //    s=1.290, 0.777, 0.965, 1.0786
 
     // change this to MNA for testing MNA
-    val forecastsMNM = algo.calculateETS(series, alpha, beta, gamma, "MNM", period, horizon)
+    val (forecastsMNM, _) = algo.calculateETS(series, alpha, beta, gamma, "MNM", period, horizon)
     forecastsMNM.length should equal(4)
     forecastsMNM.map{value => DoubleUtil.round(value,1)} should equal(DenseVector(57.9, 34.9,43.4, 48.5))
   }
