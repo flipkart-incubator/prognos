@@ -1,4 +1,4 @@
-package com.ets.forecast
+package com.prognos.forecast
 
 /**
  * Created by nikhil.vavs on 11/06/15.
@@ -35,9 +35,10 @@ class EtsTest_xAA extends FlatSpec with Matchers{
     //    b = 0.4086
     //    s=2.1252, -1.2615, -6.08, 5.2162
 
-    val algo = new Ets(24.9416, 0.5088, DenseVector(0.9781, -0.7702, -6.9848, 6.7769))
-    val (alpha, beta, gamma, period, horizon) = (0.2889, 0.0001, 0.4452, 4, 4)
-    val forecasts = algo.calculateETS(series, alpha, beta, gamma, "AAA", period , horizon)
+    val algo = new Ets()
+    algo.setInitialValues(24.9416, 0.5088, DenseVector(0.9781, -0.7702, -6.9848, 6.7769))
+    val (alpha, beta, gamma, period, horizon) = (0.13, 0.0001, 0.49, 4, 4)
+    val (forecasts, _) = algo.calculateETS(series, alpha, beta, gamma, "AAA", period , horizon)
     forecasts.length should equal(4)
     forecasts.map(DoubleUtil.round(_, 1)) should equal(DenseVector(60.1, 37.5, 46.4, 50.0))
   }

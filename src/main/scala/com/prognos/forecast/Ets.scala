@@ -1,4 +1,4 @@
-package com.ets.forecast
+package com.prognos.forecast
 
 import breeze.linalg.DenseVector
 import com.prognos.Series
@@ -9,18 +9,21 @@ import math.pow
  */
 
 /*
-* Usage : val a = new Ets(1.0, 3.6, DenseVector(1.3, 3,2, 2))
-*       or val a = new Ets()
+* Usage :  val a = new Ets()
 * */
-class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[Double], initialValuesPassed:Boolean) {
+class Ets {
   // amn, anm, aam, ama, mma, amm models are not allowed
 
-  def this(){
-    this(0, 0, DenseVector(0), false)
-  }
+  var initialLevel = -1.0
+  var initialTrend = 1.0
+  var initialSeasonal = DenseVector(0.0)
+  var initialValuesPassed = false
 
-  def this(x:Double, y:Double, z:DenseVector[Double]){
-    this(x, y, z, true)
+  def setInitialValues(x:Double, y:Double, z:DenseVector[Double]) = {
+    initialLevel = x
+    initialTrend = y
+    initialSeasonal = z
+    initialValuesPassed = true
   }
 
   /*
@@ -35,22 +38,29 @@ class Ets(initialLevel:Double, initialTrend:Double, initialSeasonal:DenseVector[
     val initialTrend = calcInitialTrend(data, modelType, initialLevel)
     val initialSeasonalIndices:DenseVector[Double] = calcInitialSeasonal(data, modelType, initialLevel, initialTrend)
 
-    val (level, trend, seasonalIndices) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonalIndices)) {
-      case (levelTrendSeasonAndError:(Double, Double, DenseVector[Double]), value:Double) =>
-        val (prevLevel, prevTrend, prevSeasonal) = levelTrendSeasonAndError
+    val (level, trend, seasonalIndices, sse) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonalIndices, 0.0)) {
+      case (levelTrendSeasonAndError:(Double, Double, DenseVector[Double], Double), value:Double) =>
+        val (prevLevel, prevTrend, prevSeasonal, currSSE) = levelTrendSeasonAndError
         //        printSeasonal(prevSeasonal)
         val currError = calcError(value, modelType, prevLevel, prevTrend, prevSeasonal, period)
+        val nextSSE = currSSE + currError*currError
         val level:Double = calcLevel(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
         val trend:Double = calcTrend(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
         val seasonalIndex:Double = calcSeasonal(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
-        (level, trend, concat(prevSeasonal, seasonalIndex))
+        (level, trend, concat(prevSeasonal, seasonalIndex), nextSSE)
     }
     //    println("level:"+level)
     //    println("trend:"+trend)
     //    printSeasonal(seasonalIndices)
 
+    val n = data.length
+    val k = 3 - modelType.count( c => c=='N') // number of parameters estimated
+
+
+    val aic = n*math.log(sse/n) + 2*k
+
     val forecasts = (1 to horizon).map(h => calcForecast(level, trend, seasonalIndices, h, period, modelType)).toArray
-    DenseVector(forecasts)
+    (DenseVector(forecasts), aic)
   }
 
   //debug functions
