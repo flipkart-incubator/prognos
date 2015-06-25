@@ -12,17 +12,17 @@ class Croston {
 * https://help.sap.com/saphelp_scm70/helpdata/en/ac/216b89337b11d398290000e8a49608/content.htm
 * http://www.robjhyndman.com/papers/croston.pdf
 * */
-  def predict(data:Array[Int]):Double={
-    predict(data.map{_.toDouble})
+  def predict(data:Array[Int],alpha:Double):Double={
+    predict(data.map{_.toDouble},alpha)
   }
-  def predict(data: Array[Double]): Double = {
+  def predict(data: Array[Double],alpha:Double): Double = {
     val estimateDemandVolume: Array[Double] = Array.fill(data.length) {
       1.000
     }
     val estimateTimeInterval: Array[Double] = Array.fill(data.length) {
       1.000
     }
-    val alpha = 0.1
+
 
     if (data(0) != 0) {
       estimateDemandVolume(0) = data(1)
