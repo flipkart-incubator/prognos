@@ -1,4 +1,4 @@
-package com.ets.forecast
+package com.prognos.forecast
 
 /**
  * Created by nikhil.vavs on 11/06/15.
@@ -11,7 +11,7 @@ import org.scalatest.{FlatSpec,Matchers}
 import com.prognos.testdata.AirPassengerData
 
 class EtsTest_xMN extends FlatSpec with Matchers{
-  it should "calculate forecasts using  method with alpha=0.8 and beta=0.2" in {
+  it should "test amn" in {
     val series = Series(AirPassengerData.rangeData(1970, 2009).map {value => DoubleUtil.round(value)})
     val algo = new Ets()
     algo.setInitialValues(7.6358, 1.0433, DenseVector(1.0))

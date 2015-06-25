@@ -1,4 +1,4 @@
-package com.ets.forecast
+package com.prognos.forecast
 
 /**
  * Created by nikhil.vavs on 11/06/15.
@@ -12,7 +12,7 @@ import com.prognos.testdata.TouristsData
 
 class EtsTest_xMM extends FlatSpec with Matchers{
   // amm not allowed
-  it should "testing MMM" in {
+  it should "test MMM" in {
     val series = Series(TouristsData.seasonalRangeData(1999, 2010).map {value => DoubleUtil.round(value)})
     val algo = new Ets()
     algo.setInitialValues(23.5318, 1.014, DenseVector(1.2772, 0.760, 0.9907, 1.07882))

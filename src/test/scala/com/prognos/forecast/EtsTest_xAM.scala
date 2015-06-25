@@ -1,4 +1,4 @@
-package com.ets.forecast
+package com.prognos.forecast
 
 /**
  * Created by nikhil.vavs on 11/06/15.

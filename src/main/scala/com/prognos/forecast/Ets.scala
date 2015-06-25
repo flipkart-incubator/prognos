@@ -1,4 +1,4 @@
-package com.ets.forecast
+package com.prognos.forecast
 
 import breeze.linalg.DenseVector
 import com.prognos.Series
@@ -9,10 +9,9 @@ import math.pow
  */
 
 /*
-* Usage : val a = new Ets(1.0, 3.6, DenseVector(1.3, 3,2, 2))
-*       or val a = new Ets()
+* Usage :  val a = new Ets()
 * */
-class Ets{
+class Ets {
   // amn, anm, aam, ama, mma, amm models are not allowed
 
   var initialLevel = -1.0
