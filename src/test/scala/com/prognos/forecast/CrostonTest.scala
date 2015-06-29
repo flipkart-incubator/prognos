@@ -15,14 +15,15 @@ class CrostonTest extends FlatSpec with Matchers{
       CrostonTestData.inputSeriesList.zip(CrostonTestData.targetList).foreach { case (data:Array[Int], expected:Double) =>
         val series = data.map(_.toDouble)
         val alpha = 0.1
-        val prediction = algo.predict(series,alpha)
+        val (prediction,meanTT) = algo.predict(series,alpha)
+        println(meanTT)
         expected match {
           case 0 => assert(prediction - expected <= 0.5)
           case expected => {
 
             val error = Math.abs(prediction - expected) / expected
             println(expected)
-            //println(error)
+            println(error)
             println("_______________")
             assert(error <= 0.09 || Math.abs(prediction - expected) <=15  )
           }

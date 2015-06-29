@@ -1,5 +1,7 @@
 package com.prognos.forecast
 
+import breeze.linalg.sum
+
 /**
  * Created by ajay.v on 18/06/15.
  */
@@ -12,10 +14,10 @@ class Croston {
 * https://help.sap.com/saphelp_scm70/helpdata/en/ac/216b89337b11d398290000e8a49608/content.htm
 * http://www.robjhyndman.com/papers/croston.pdf
 * */
-  def predict(data:Array[Int],alpha:Double):Double={
+  def predict(data:Array[Int],alpha:Double):(Double,Double)={
     predict(data.map{_.toDouble},alpha)
   }
-  def predict(data: Array[Double],alpha:Double): Double = {
+  def predict(data: Array[Double],alpha:Double): (Double,Double) = {
     val estimateDemandVolume: Array[Double] = Array.fill(data.length) {
       1.000
     }
@@ -55,7 +57,8 @@ class Croston {
       }
     }
       val forecast = estimateDemandVolume(data.length - 1) / estimateTimeInterval(data.length - 1)
-      forecast
+      val meanTT = sum(estimateTimeInterval) / estimateTimeInterval.length
+    (forecast,meanTT)
   }
 }
 
