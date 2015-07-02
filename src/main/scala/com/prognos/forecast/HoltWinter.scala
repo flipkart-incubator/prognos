@@ -22,6 +22,7 @@ class HoltWinter {
       case (levelTrendAndSeason:(Double,Double,DenseVector[Double], Double), value:Double) =>
         val (prevLevel, prevTrend, seasonalIndices, currSSE) = levelTrendAndSeason
         val xHat = prevLevel+ prevTrend
+//        SSE is valid only for nonSeasonalData
         val SSE = (value - xHat)*(value-xHat)
         val level:Double = calcLevel(alpha, value, prevLevel, prevTrend, seasonalIndices, period)
         val trend:Double = calcTrend(beta, prevLevel, prevTrend, level)
@@ -30,6 +31,7 @@ class HoltWinter {
       }
     val forecasts = (1 to horizon).map {h => calcForecast(level, trend, seasonalIndices, h, period)}.toArray
 
+//   SSE is valid result only for non seasonal data
     (DenseVector(forecasts), sse)
   }
 
