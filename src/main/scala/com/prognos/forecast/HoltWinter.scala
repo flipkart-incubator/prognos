@@ -18,19 +18,19 @@ class HoltWinter {
     val startTime = 3
     val data = if (nonSeasonal) dataForInit.slice(startTime-1, dataForInit.length) else dataForInit
 
-    val (level, trend, seasonalIndices) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonal)) {
-      case (levelTrendAndSeason:(Double,Double,DenseVector[Double]), value:Double) =>
-        val (prevLevel, prevTrend, seasonalIndices) = levelTrendAndSeason
+    val (level, trend, seasonalIndices, sse) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonal, 0.0)) {
+      case (levelTrendAndSeason:(Double,Double,DenseVector[Double], Double), value:Double) =>
+        val (prevLevel, prevTrend, seasonalIndices, currSSE) = levelTrendAndSeason
+        val xHat = prevLevel+ prevTrend
+        val SSE = (value - xHat)*(value-xHat)
         val level:Double = calcLevel(alpha, value, prevLevel, prevTrend, seasonalIndices, period)
         val trend:Double = calcTrend(beta, prevLevel, prevTrend, level)
         val seasonalIndex:Double = calcSeasonalIndex(gamma, value, prevLevel, prevTrend, seasonalIndices, period)
-        //val fitted = level + trend + seasonalIndices(-period)
-        //println((value, level, trend, seasonalIndex, fitted))
-        (level, trend, concat(seasonalIndices, seasonalIndex))
+        (level, trend, concat(seasonalIndices, seasonalIndex), currSSE + SSE)
       }
     val forecasts = (1 to horizon).map {h => calcForecast(level, trend, seasonalIndices, h, period)}.toArray
 
-    DenseVector(forecasts)
+    (DenseVector(forecasts), sse)
   }
 
   private def calcInitialLevel(data: DenseVector[Double], period:Int, nonSeasonal:Boolean): Double = {
