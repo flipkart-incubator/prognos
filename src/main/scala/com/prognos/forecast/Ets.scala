@@ -42,11 +42,9 @@ class Ets {
     val (level, trend, seasonalIndices, sse) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonalIndices, 0.0)) {
       case (levelTrendSeasonAndError:(Double, Double, DenseVector[Double], Double), value:Double) =>
         val (prevLevel, prevTrend, prevSeasonal, currSSE) = levelTrendSeasonAndError
-        //        printSeasonal(prevSeasonal)
         val currError = calcError(value, modelType, prevLevel, prevTrend, prevSeasonal, period)
         val nextSSE = currSSE + currError*currError
         val level:Double = calcLevel(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
-        println("next level :" + level)
         val trend:Double = calcTrend(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
         val seasonalIndex:Double = calcSeasonal(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
         (level, trend, concat(prevSeasonal, seasonalIndex), nextSSE)
@@ -134,7 +132,7 @@ class Ets {
     val Seq(errorType, trendType, seasonType) = modelType:Seq[Char]
     val levelTrendCombiner = operByChar(trendType, prevLevel, prevTrend)
     val predicted = operByChar(seasonType, levelTrendCombiner, prevSeasonal(-period))
-    println("predicted : " + predicted )
+//    println("predicted : " + predicted )
     if (errorType=='A'){  // additive error, return the difference
       value - predicted
     }
