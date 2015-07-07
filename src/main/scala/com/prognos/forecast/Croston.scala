@@ -23,7 +23,7 @@ class Croston {
     }
     val estimateTimeInterval: Array[Double] = Array.fill(data.length) {
       1.000
-    }
+    }   
     if (data(0) != 0) {
       estimateDemandVolume(0) = data(1)
       estimateTimeInterval(0) = 1
