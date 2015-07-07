@@ -6,12 +6,20 @@ import breeze.stats.mean
 
 class HoltWinter {
   def calculate(series: Series, alpha: Double, beta: Double, gamma: Double = 0.0,
-                nonSeasonal:Boolean, period:Int = 1, algoType: String, horizon: Int) = {
+                nonSeasonal:Boolean, period:Int = 1, algoType: String, horizon: Int):
+                (DenseVector[Double], Double)= {
     if(!"simple".equals(algoType)) throw new IllegalArgumentException("Invalid HoltWinter algoType:" + algoType)
     if (nonSeasonal && (period!=1 || gamma!=0.0)){
       throw new IllegalArgumentException("dude!! with non-seasonal=true, gamma has to zero and period has to be 1")
     }
     val dataForInit = series.data
+    if (dataForInit.length<3 && nonSeasonal){
+      if (dataForInit.length==1) throw new IllegalArgumentException("Too little data")
+      if (dataForInit.length==2){
+        val (val1, val2) = (dataForInit(0), dataForInit(1))
+        return (DenseVector(Array(val2 + val2 - val1)), 0)
+      }
+    }
     val initialLevel:Double = calcInitialLevel(dataForInit, period, nonSeasonal)
     val initialTrend:Double = calcInitialTrend(dataForInit, period, initialLevel, nonSeasonal)
     val initialSeasonal:DenseVector[Double] = calcInitialSeasonalIndex(dataForInit, period, initialLevel, nonSeasonal)
