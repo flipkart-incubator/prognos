@@ -17,6 +17,7 @@ class Ets {
   var initialLevel = -1.0
   var initialTrend = 1.0
   var initialSeasonal = DenseVector(0.0)
+  var sumOfSquaredErrors = 1.0
   var initialValuesPassed = false
 
   def setInitialValues(x:Double, y:Double, z:DenseVector[Double]) = {
@@ -41,7 +42,6 @@ class Ets {
     val (level, trend, seasonalIndices, sse) = data.toArray.foldLeft((initialLevel, initialTrend, initialSeasonalIndices, 0.0)) {
       case (levelTrendSeasonAndError:(Double, Double, DenseVector[Double], Double), value:Double) =>
         val (prevLevel, prevTrend, prevSeasonal, currSSE) = levelTrendSeasonAndError
-        //        printSeasonal(prevSeasonal)
         val currError = calcError(value, modelType, prevLevel, prevTrend, prevSeasonal, period)
         val nextSSE = currSSE + currError*currError
         val level:Double = calcLevel(alpha, beta, gamma, modelType, prevLevel, prevTrend, prevSeasonal, currError, period)
@@ -56,11 +56,15 @@ class Ets {
     val n = data.length
     val k = 3 - modelType.count( c => c=='N') // number of parameters estimated
 
-
+    sumOfSquaredErrors = sse
     val aic = n*math.log(sse/n) + 2*k
 
     val forecasts = (1 to horizon).map(h => calcForecast(level, trend, seasonalIndices, h, period, modelType)).toArray
     (DenseVector(forecasts), aic)
+  }
+
+  def getSSE():Double = {
+    sumOfSquaredErrors
   }
 
   //debug functions
@@ -85,7 +89,7 @@ class Ets {
   private def calcInitialTrend(data:DenseVector[Double], modelType:String, initialLevel:Double):Double = {
     (initialValuesPassed, modelType) match {
       case (true, _) => initialTrend
-      case (_, model) if Set("AAN", "MAN").contains(model) => data(1)/data(0)
+      case (_, model) if Set("AAN", "MAN").contains(model) => data(1) - data(0)
       // TODO implement initialTrend Calculation for other models
       case  _ => 1.0
     }
@@ -128,6 +132,7 @@ class Ets {
     val Seq(errorType, trendType, seasonType) = modelType:Seq[Char]
     val levelTrendCombiner = operByChar(trendType, prevLevel, prevTrend)
     val predicted = operByChar(seasonType, levelTrendCombiner, prevSeasonal(-period))
+//    println("predicted : " + predicted )
     if (errorType=='A'){  // additive error, return the difference
       value - predicted
     }
