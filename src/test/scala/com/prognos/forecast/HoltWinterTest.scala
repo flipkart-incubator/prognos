@@ -2,9 +2,8 @@ package com.prognos.forecast
 
 import breeze.linalg.DenseVector
 import com.prognos.Series
-import com.prognos.testdata.{TouristsData, AirPassengerData}
 import com.prognos.util.DoubleUtil
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 class HoltWinterTest extends FlatSpec with Matchers {
   it should "calculate forecasts using HoltWinters method with alpha=0.025, beta=0.023, gamma=0.0001" in {
